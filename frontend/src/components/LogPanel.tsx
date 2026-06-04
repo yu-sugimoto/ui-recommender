@@ -151,7 +151,17 @@ export default function LogPanel({ logState, defaultCollapsed }: LogPanelProps) 
     }
   }
 
-  const jobKeys = useMemo(() => [...logState.jobs.keys()], [logState.jobs])
+  const jobKeys = useMemo(() => {
+    const order: Record<string, number> = { analyze: 0, implement: 1, createpr: 2 }
+    return [...logState.jobs.keys()].sort((a, b) => {
+      const [typeA, idxA] = a.split(':')
+      const [typeB, idxB] = b.split(':')
+      const rankA = order[typeA] ?? 99
+      const rankB = order[typeB] ?? 99
+      if (rankA !== rankB) return rankA - rankB
+      return (Number(idxA) || 0) - (Number(idxB) || 0)
+    })
+  }, [logState.jobs])
 
   // Derive activeTab: use selected if valid, otherwise first available
   const activeTab =
