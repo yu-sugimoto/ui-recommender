@@ -26,7 +26,7 @@ analyze 完了直後にバックエンドが 最大5件すべてを並列に自�
 
 ## デモ
 
-<!-- TODO: デモ動画 / スクリーンショットを貼る -->
+https://github.com/user-attachments/assets/70bfb2ec-21a3-489a-95f6-c40c59a0def5
 
 ## 使用技術
 #### フロントサイド
