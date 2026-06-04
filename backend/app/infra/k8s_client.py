@@ -2,6 +2,7 @@ import asyncio
 import logging
 from collections.abc import AsyncIterator
 
+import urllib3
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
@@ -27,6 +28,7 @@ class K8sClient:
                 k8s_config.host = k8s_config.host.replace("127.0.0.1", "host.docker.internal")
                 k8s_config.verify_ssl = False
                 client.Configuration.set_default(k8s_config)
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.batch_v1 = client.BatchV1Api()
         self.core_v1 = client.CoreV1Api()
         self.namespace = settings.K8S_NAMESPACE

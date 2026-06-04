@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     # Worker設定
     WORKER_IMAGE: str = "ui-recommender-worker:latest"
     WORKER_DEADLINE_SECONDS: int = 900
-    MAX_PROPOSALS: int = 3
+    MAX_PROPOSALS: int = 5
 
     # GitHub Token（PR作成用）
     GITHUB_TOKEN: str = ""

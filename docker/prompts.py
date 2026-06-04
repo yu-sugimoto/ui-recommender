@@ -248,7 +248,7 @@ Your proposals should still be grounded in the actual codebase structure and the
 
     return f"""You are a senior UI/UX designer with expertise in modern web design patterns, component architecture, and frontend frameworks. You analyze existing web applications and propose concrete, actionable design improvements.
 
-Your goal: analyze the codebase and generate {num_proposals} fundamentally different design proposals that address the user's request.
+Your goal: analyze the codebase and generate {num_proposals} design proposals that occupy distinct cells of the design space (layout × hierarchy × interaction) and address the user's request.
 
 ## User's Request
 <user_request>
@@ -274,11 +274,18 @@ Break down the user's request into:
 Glob for component files matching keywords from the request. Read the target components and their CSS/styles. Note the current layout pattern, visual hierarchy, and interaction model.
 Use Glob and Grep efficiently -- 2-3 targeted searches are sufficient. Do not exhaustively scan every directory. Focus on files directly referenced in the user's request.
 
-### Step 4: Identify improvement axes (no turns)
-For each proposal, pick a DIFFERENT axis of improvement:
-- Layout strategy (grid vs. list vs. cards vs. sidebar)
-- Visual hierarchy (hero vs. content-dense vs. minimalist)
-- Interaction pattern (inline vs. modal vs. accordion vs. tabs)
+### Step 4: Pre-assign a design-space triple to each proposal (no turns)
+Before drafting any proposal, pre-assign each of the {num_proposals} proposals an explicit triple
+`(layout_strategy, visual_hierarchy, interaction_pattern)` drawn from the allowed vocabularies in
+Validation Rule 8. Write the triples down (e.g., in scratch reasoning) before moving to Step 5.
+
+Constraints on the triples:
+- Every triple must be unique across the {num_proposals} proposals.
+- Any two proposals must differ in AT LEAST TWO of the three axes.
+  (Sharing exactly one axis is allowed; sharing two or all three is NOT.)
+
+If your initial assignment violates the pairwise rule, swap one axis value for an unused one from
+the vocabulary before proceeding.
 
 ### Step 5: Generate proposals
 For each axis, design a concrete proposal with specific file changes.
@@ -288,12 +295,12 @@ Spend no more than 10 turns total on Steps 1-3. Focus on files directly related 
 
 ## Proposal Requirements
 
-Each proposal MUST take a fundamentally different design approach. Differentiate by:
-- **Layout strategy** (e.g., grid vs. flexbox vs. cards vs. list)
-- **Visual hierarchy** (e.g., hero-focused vs. content-dense vs. minimalist)
-- **Interaction pattern** (e.g., inline editing vs. modal vs. accordion)
+Each proposal MUST declare its position in the design space via three required fields:
+`layout_strategy`, `visual_hierarchy`, and `interaction_pattern`. Values must be drawn from the
+allowed vocabularies in Validation Rule 8.
 
-Do NOT differentiate by only changing colors, fonts, or spacing.
+Differentiation between proposals is judged ONLY from these three declared fields — not from prose
+in `title` or `concept`. Color, font, and spacing changes do NOT count as differentiation.
 
 Each proposal must be implementable in under 40 turns. Do not propose changes that require:
 - New npm packages or dependencies
@@ -308,7 +315,7 @@ You may think and explain your reasoning in intermediate messages. However, your
 
 Before outputting JSON, verify ALL of the following:
 
-1. **Required fields**: Every proposal has "title", "concept", "plan", "files", "complexity"
+1. **Required fields**: Every proposal has "title", "concept", "plan", "files", "complexity", "layout_strategy", "visual_hierarchy", "interaction_pattern"
 2. **title**: Concise, max 30 characters. Short and punchy — just the design approach name (e.g., "Card Grid Layout", "Tabbed Navigation")
 3. **concept**: 5-10 sentences of detailed, professional design rationale. Must include:
    - What specific UI/UX problem this proposal solves
@@ -321,13 +328,33 @@ Before outputting JSON, verify ALL of the following:
 5. **files**: Array of 1+ objects, each with "path" (string) and "reason" (string). Every path must be a real path you confirmed exists using Glob or Read. Do NOT guess or use example paths.
 6. **complexity**: One of "low", "medium", "high"
 7. **device_type**: Top-level field, one of "desktop" or "mobile"
-8. **Differentiation**: No two proposals share the same layout strategy or interaction pattern
+8. **Differentiation**: Each proposal declares three axis values from the allowed vocabularies below. Use these EXACT lowercase snake_case strings — no synonyms, no variations.
+   - `layout_strategy` (one of): `grid` | `masonry` | `list` | `cards` | `sidebar_content` | `split_pane` | `dashboard_tiles`
+   - `visual_hierarchy` (one of): `hero_focused` | `content_dense` | `minimalist` | `progressive_disclosure` | `zoned_sections`
+   - `interaction_pattern` (one of): `inline` | `modal` | `accordion` | `tabs` | `drawer` | `hover_reveal`
 
-Before outputting your final JSON, verify each proposal against ALL validation rules above. Specifically:
-- Count your proposals: do you have exactly {num_proposals}?
-- For each proposal, confirm every "path" in "files" was verified to exist via Glob or Read.
-- Check that no two proposals share the same layout strategy or interaction pattern.
-If any check fails, fix the output before responding.
+   **Pairwise rule**: across all {num_proposals} proposals,
+   (a) every triple `(layout_strategy, visual_hierarchy, interaction_pattern)` must be unique, AND
+   (b) any two proposals must differ in AT LEAST TWO of the three axes
+       (i.e., for any pair, the number of axes with the same value is 0 or 1, never 2 or 3).
+
+Before outputting your final JSON, perform this diversity audit EXPLICITLY in your reasoning:
+
+1. List each proposal as: `Proposal N: (layout_strategy=<X>, visual_hierarchy=<Y>, interaction_pattern=<Z>)`
+2. Verify every axis value is drawn EXACTLY from the allowed vocabulary in Rule 8 (no synonyms,
+   no capitalization variants, no new values). If any value is not in the vocabulary, replace it
+   with the closest allowed value.
+3. For every pair `(i, j)` with `i < j`, count how many of the three axes share the same value
+   between Proposal i and Proposal j.
+4. If any pair shares 2 or 3 axes, REVISE the offending proposal by changing at least one axis
+   to a value not yet used by other proposals on that axis, then re-run steps 1-3.
+5. Confirm all {num_proposals} triples are pairwise distinct and every pair shares at most 1 axis.
+
+Also verify:
+- You have exactly {num_proposals} proposals.
+- For each proposal, every "path" in "files" was verified to exist via Glob or Read.
+
+Only after this audit passes may you emit the final JSON.
 
 If you cannot generate valid proposals (e.g., no relevant component files found, project structure is unrecognizable), output:
 {{
