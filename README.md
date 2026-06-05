@@ -5,6 +5,10 @@ UI Recommender
 
 ## 概要
 
+<img width="1271" height="595" alt="image" src="https://github.com/user-attachments/assets/5b1f363d-db81-4f14-bbd3-76e719393cbd" />
+
+<div>&nbsp;</div>
+
 このツールでは, GitHubリポジトリの解析とデザインコンテキスト抽出（ui-ux-pro-max CLI）, Before/Afterスクリーンショット取得（Playwright MCP）, Claude Agent SDKによる最大5件のデザイン案生成と並列実装, S3/MinIOによる成果物保存, GitHubへのPR自動作成を実装しました. ユーザーがリポジトリURL・ベースブランチ・デザイン指示を入力すると, AIが最大5件分のデザイン案をすべて実装し, それぞれのafterスクリーンショットを成果物として返します. ユーザーは「コード変更前の plan」ではなく「実装済みの動く成果物」を見比べて1件を選び, 選ばれた案だけがPRとしてGitHubに作成されます.
 
 ### 提案生成・実装パイプライン（LangGraph + Claude Agent SDK ワーカー）の実装
